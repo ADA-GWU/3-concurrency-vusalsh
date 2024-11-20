@@ -4,6 +4,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -30,11 +33,32 @@ public class Main {
             ImageIO.write(image, "jpg", new File("src/result.jpg"));
         }
         else if(pMode.equals("M")){
-            //TO - DO
+            int maxThreads = Runtime.getRuntime().availableProcessors();
+            int numThreads = Math.min((int) Math.ceil(image.getHeight() / square), maxThreads);
+            try (ExecutorService executor = Executors.newFixedThreadPool(numThreads)) {
+                int sectionHeight = image.getHeight() / numThreads;
+                for (int i = 0; i < numThreads; i++) {
+                    int yStart = i * sectionHeight;
+                    int yEnd = (i == numThreads - 1) ? image.getHeight() : (i + 1) * sectionHeight;
+                    ImageProcessor processor = new ImageProcessor(image, square, panel, yStart, yEnd);
+                    executor.submit(processor);
+                }
+                executor.shutdown();
+                try {
+                    if (executor.awaitTermination(1, TimeUnit.MINUTES)) {
+                        ImageIO.write(image, "jpg", new File("src/result.jpg"));
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new RuntimeException(e);
+                }
+                finally{
+                    frame.dispose();
+                }
+            }
         }
         else{
             System.out.printf("Invalid argument: %s\n", args[2]);
         }
-
     }
 }

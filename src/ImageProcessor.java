@@ -19,7 +19,7 @@ public class ImageProcessor implements Runnable {
     @Override
     public void run() {
         int width = image.getWidth();
-        for (int y = yStart; y < yEnd; y += square) {
+        for (int y = yStart; y <= yEnd; y += square) {
             for (int x = 0; x <= width; x += square) {
                 int boxXEnd = Math.min(width, x + square);
                 int boxYEnd = Math.min(yEnd, y + square);
