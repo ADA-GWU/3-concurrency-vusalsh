@@ -21,5 +21,20 @@ public class Main {
         frame.add(panel);
         frame.pack();
         frame.setVisible(true);
+
+        String pMode = args[2];
+        if(pMode.equals("S")){
+            ImageProcessor processor = new ImageProcessor(image, square, panel, 0, image.getHeight());
+            processor.run();
+            frame.dispose();
+            ImageIO.write(image, "jpg", new File("src/result.jpg"));
+        }
+        else if(pMode.equals("M")){
+            //TO - DO
+        }
+        else{
+            System.out.printf("Invalid argument: %s\n", args[2]);
+        }
+
     }
 }

@@ -1,15 +1,49 @@
 import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public class ImageProcessor {
+public class ImageProcessor implements Runnable {
     private final BufferedImage image;
+    private final int square;
+    private final int yStart;
+    private final int yEnd;
+    private final ImagePanel panel;
 
     public ImageProcessor(BufferedImage image, int square, ImagePanel panel, int yStart, int yEnd) {
         this.image = image;
+        this.square = square;
+        this.panel = panel;
+        this.yStart = yStart;
+        this.yEnd = yEnd;
     }
 
+    @Override
+    public void run() {
+        int width = image.getWidth();
+        for (int y = yStart; y < yEnd; y += square) {
+            for (int x = 0; x <= width; x += square) {
+                int boxXEnd = Math.min(width, x + square);
+                int boxYEnd = Math.min(yEnd, y + square);
+                int color = getAverageColor(x, boxXEnd, y, boxYEnd);
+                paintBox(x, boxXEnd, y, boxYEnd, color);
+                panel.repaint();
+                try {
+                    Thread.sleep(25);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+    }
 
-    public int getAverageColor(int xStart, int xEnd, int yStart, int yEnd) {
+    private void paintBox(int xStart, int xEnd, int yStart, int yEnd, int color) {
+        for (int i = xStart; i < xEnd; i++) {
+            for (int j = yStart; j < yEnd; j++) {
+                image.setRGB(i, j, color);
+            }
+        }
+    }
+
+    private int getAverageColor(int xStart, int xEnd, int yStart, int yEnd) {
         double red = 0;
         double green = 0;
         double blue = 0;
