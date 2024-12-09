@@ -35,7 +35,9 @@ public class Main {
         else if(pMode.equals("M")){
             int maxThreads = Runtime.getRuntime().availableProcessors();
             int numThreads = Math.min((int) Math.ceil(image.getHeight() / square), maxThreads);
-            try (ExecutorService executor = Executors.newFixedThreadPool(numThreads)) {
+            ExecutorService executor = null;
+            try {
+                executor = Executors.newFixedThreadPool(numThreads);
                 int sectionHeight = image.getHeight() / numThreads;
                 for (int i = 0; i < numThreads; i++) {
                     int yStart = i * sectionHeight;
@@ -54,6 +56,11 @@ public class Main {
                 }
                 finally{
                     frame.dispose();
+                }
+            }
+            finally{
+                if (executor != null && !executor.isTerminated()) {
+                    executor.shutdownNow();
                 }
             }
         }
